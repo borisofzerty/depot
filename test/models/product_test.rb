@@ -1,7 +1,59 @@
 require 'test_helper'
 
 class ProductTest < ActiveSupport::TestCase
-  # test "the truth" do
-  #   assert true
-  # end
+  fixtures :products
+
+  test "product attributer must not be empty" do
+    product = Product.new
+    assert product.invalid?
+    assert product.errors[:title].any?
+    assert product.errors[:description].any?
+    assert product.errors[:price].any?
+    assert product.errors[:image_url].any?
+  end
+
+  test "product is not valid if title is already taken" do
+    product = Product.new(title:       products(:cs).title,
+                          description: "d",
+                          image_url:   "x.png",
+                          price:       10)
+
+    assert product.invalid?
+    assert_equal [I18n.translate('errors.messages.taken')], product.errors[:title]
+  end
+
+  test "product price must be positive" do
+    product = Product.new(title:       "T",
+                          description: "d",
+                          image_url:   "x.png")
+    product.price = -1
+    assert product.invalid?
+    assert_equal ["must be greater than or equal to 0.01"],
+                  product.errors[:price]
+
+    product.price = 0
+    assert product.invalid?
+    assert_equal ["must be greater than or equal to 0.01"],
+                  product.errors[:price]
+
+    product.price = 1
+    assert product.valid?
+  end
+
+  test "image url" do
+    product = Product.new(title:       "T",
+                          description: "d",
+                          price:       10)
+
+    %W{ a.jpg b.gif c.PNG d.png }.each do |name|
+      product.image_url = name
+      assert product.valid?, "#{name} should be valid"
+    end
+
+    %W{ a.jpeg b.guf c.PONG dpng}.each do |name|
+      product.image_url = name
+      assert product.invalid?, "#{name} shouldn't be valid"
+    end
+
+  end
 end
