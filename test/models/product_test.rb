@@ -23,9 +23,8 @@ class ProductTest < ActiveSupport::TestCase
   end
 
   test "product price must be positive" do
-    product = Product.new(title:       "T",
-                          description: "d",
-                          image_url:   "x.png")
+    product = products(:cs)
+
     product.price = -1
     assert product.invalid?
     assert_equal ["must be greater than or equal to 0.01"],
@@ -40,10 +39,20 @@ class ProductTest < ActiveSupport::TestCase
     assert product.valid?
   end
 
+  test "description longer than 1000 chars will not be accepted" do
+    product = products(:cs)
+    product.description = "#" * 1001
+    assert product.invalid?
+  end
+
+  test "title longer than 100 chars will not be accepted" do
+    product = products(:cs)
+    product.title = "#" * 101
+    assert product.invalid?
+  end
+
   test "image url" do
-    product = Product.new(title:       "T",
-                          description: "d",
-                          price:       10)
+    product = products(:cs)
 
     %W{ a.jpg b.gif c.PNG d.png }.each do |name|
       product.image_url = name
