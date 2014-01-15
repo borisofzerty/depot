@@ -7,6 +7,8 @@
 # Visit http://www.pragmaticprogrammer.com/titles/rails4 for more book information.
 #---
 # encoding: utf-8
+Cart.delete_all
+LineItem.delete_all
 Product.delete_all
 Product.create!(title: 'CoffeeScript',
   description: 
